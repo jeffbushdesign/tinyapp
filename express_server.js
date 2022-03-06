@@ -1,8 +1,12 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
+const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 function generateRandomString() {
   let result = '';
@@ -14,8 +18,6 @@ function generateRandomString() {
   return result;
 };
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
@@ -78,6 +80,17 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   urlDatabase[shortURL] = req.body.newURL;
+  res.redirect('/urls');
+});
+
+// login
+// Add an endpoint to handle a POST to /login in your Express server.
+app.post("/login", (req, res) => {
+  // It should set a cookie named username to the value submitted in the request body via the login form
+  const username = req.body.username;
+  res.cookie('username', username);
+
+  // After our server has set the cookie it should redirect the browser back to the /urls page.
   res.redirect('/urls');
 });
 
