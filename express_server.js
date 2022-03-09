@@ -28,6 +28,49 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
+
+// NEW NEW NEW
+app.post("/register", (req, res) => {
+  // add a new user object to the global users object. 
+  // generate a random user id
+  console.log(req.body.email);
+  console.log(req.body.password);
+  const id = generateRandomString();
+  // The user object should include the user's id, email and password
+  users[id] = {};
+  // console.log(users.userRandomID);ç
+  users[id].id = id;
+  users[id].email = req.body.email;
+  users[id].password = req.body.password;
+
+
+  // After adding the user, set a user_id cookie containing the user's newly generated ID
+  res.cookie('user_id', id);
+
+  // Test that the users object is properly being appended to. 
+  // You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
+  console.log(users[id]);
+
+
+
+  // go home after registering
+  res.redirect('/urls');
+});
+/// NEW NEW NEW
+
 app.get("/", (req, res) => {
   res.redirect('/urls');
 });
