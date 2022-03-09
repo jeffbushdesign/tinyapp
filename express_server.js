@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const { func } = require("joi");
 
 const PORT = 8080; // default port 8080
 
@@ -28,6 +29,13 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+// Helper function for getting ID
+const getCurrentUser = function (userID, usersDatabase) {
+  if (!usersDatabase[userID]) return null;
+  return usersDatabase[userID];
+
+};
+
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -46,10 +54,11 @@ const users = {
 app.post("/register", (req, res) => {
   // add a new user object to the global users object. 
   // generate a random user id
-  console.log(req.body.email);
-  console.log(req.body.password);
+  // console.log(req.body.email);
+  // console.log(req.body.password);
   const id = generateRandomString();
   // The user object should include the user's id, email and password
+  // make a new object for the new user
   users[id] = {};
   // console.log(users.userRandomID);ç
   users[id].id = id;
@@ -71,6 +80,10 @@ app.post("/register", (req, res) => {
 });
 /// NEW NEW NEW
 
+
+
+
+
 app.get("/", (req, res) => {
   res.redirect('/urls');
 });
@@ -90,8 +103,11 @@ app.post("/urls", (req, res) => {
 // add additional endpoints
 // when you're entering a new url
 app.get("/urls/new", (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
+    user: currUser
   };
   res.render("urls_new", templateVars);
 });
@@ -109,9 +125,12 @@ app.get("/hello", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
+    user: currUser
   };
   res.render("urls_index", templateVars);
 });
@@ -121,8 +140,12 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/:shortURL", (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
+
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
+    user: currUser,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
   };
@@ -137,7 +160,8 @@ app.get("/u/:shortURL", (req, res) => {
 // Route for register page
 app.get('/register', (req, res) => {
   const templateVars = {
-    username: req.cookies["username"],
+    // username: req.cookies["username"],
+    user: users['3qzKDF']
   };
   res.render('register', templateVars);
 });
