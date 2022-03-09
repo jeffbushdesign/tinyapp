@@ -1,12 +1,17 @@
 const express = require("express");
-const app = express();
-const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+
+const PORT = 8080; // default port 8080
+
+const app = express();
 
 app.set("view engine", "ejs");
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(morgan('dev'));
 
 function generateRandomString() {
   let result = '';
@@ -18,6 +23,14 @@ function generateRandomString() {
   return result;
 };
 
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+
+app.get("/", (req, res) => {
+  res.redirect('/urls');
+});
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
@@ -27,19 +40,9 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
 
-// message that appears in terminal when you start the server
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
+
 
 // add additional endpoints
 // when you're entering a new url
@@ -88,6 +91,14 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+// Route for register page
+app.get('/register', (req, res) => {
+  const templateVars = {
+    username: req.cookies["username"],
+  };
+  res.render('register', templateVars);
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
@@ -116,3 +127,7 @@ app.post("/logout", (req, res) => {
   res.redirect('/urls');
 });
 
+// message that appears in terminal when you start the server
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
