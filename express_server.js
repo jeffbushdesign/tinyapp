@@ -33,7 +33,6 @@ const urlDatabase = {
 const getCurrentUser = function (userID, usersDatabase) {
   if (!usersDatabase[userID]) return null;
   return usersDatabase[userID];
-
 };
 
 const users = {
@@ -71,7 +70,8 @@ app.post("/register", (req, res) => {
 
   // Test that the users object is properly being appended to. 
   // You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
-  console.log(users[id]);
+  console.log('Newly registered user: ', users[id]);
+  console.log('Entire user database:', users);
 
 
 
@@ -159,9 +159,11 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Route for register page
 app.get('/register', (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     // username: req.cookies["username"],
-    user: users['3qzKDF']
+    user: currUser
   };
   res.render('register', templateVars);
 });
