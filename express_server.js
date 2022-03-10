@@ -35,6 +35,8 @@ const getCurrentUser = function (userID, usersDatabase) {
   return usersDatabase[userID];
 };
 
+
+
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -47,12 +49,39 @@ const users = {
     password: "dishwasher-funk"
   }
 };
+// console.log(users.user2RandomID.email);
+
+// Helper function for checking if email address has already been registered.
+const checkEmailAlreadyRegistered = function (email) {
+  // console.log('Users from inside function:', users);
+  for (let item in users) {
+    // console.log('item', item);
+    if (email === users[item].email) {
+      // res.status(400).send("Error. Email address has already been registered.");
+      return true;
+    }
+  }
+  return false;
+};
 
 
 // NEW NEW NEW
 app.post("/register", (req, res) => {
   // add a new user object to the global users object. 
   // generate a random user id
+
+  // if the email or password are empty strings, send back a response with the 400 status code
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(400).send("Email and Password field cannot be left blank. Please try again.");
+  }
+
+  // If someone tries to register with an email that is already in the users object, send back a response with the 400 status code. Checking for an email in the users object is something we'll need to do in other routes as well. Consider creating an email lookup helper function to keep your code DRY
+  if (checkEmailAlreadyRegistered(req.body.email)) {
+    return res.status(400).send("Error. Email address has already been registered.");
+  }
+
+  // ----------
+
   // console.log(req.body.email);
   // console.log(req.body.password);
   const id = generateRandomString();
