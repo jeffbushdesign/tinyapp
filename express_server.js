@@ -53,11 +53,8 @@ const users = {
 
 // Helper function for checking if email address has already been registered.
 const checkEmailAlreadyRegistered = function (email) {
-  // console.log('Users from inside function:', users);
   for (let item in users) {
-    // console.log('item', item);
     if (email === users[item].email) {
-      // res.status(400).send("Error. Email address has already been registered.");
       return true;
     }
   }
@@ -77,7 +74,8 @@ app.post("/register", (req, res) => {
 
   // If someone tries to register with an email that is already in the users object, send back a response with the 400 status code. Checking for an email in the users object is something we'll need to do in other routes as well. Consider creating an email lookup helper function to keep your code DRY
   if (checkEmailAlreadyRegistered(req.body.email)) {
-    return res.status(400).send("Error. Email address has already been registered.");
+    return res.status(400).send('Error. Email address has already been registered.');
+
   }
 
   // ----------
@@ -99,8 +97,8 @@ app.post("/register", (req, res) => {
 
   // Test that the users object is properly being appended to. 
   // You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
-  console.log('Newly registered user: ', users[id]);
-  console.log('Entire user database:', users);
+  // console.log('Newly registered user: ', users[id]);
+  console.log('User database:', users);
 
 
 
@@ -122,7 +120,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   console.log(req.body);  // Log the POST request body to the console
-  res.redirect(`/urls/${shortURL}`);
+  res.redirect(`/ urls / ${shortURL}`);
 });
 
 
@@ -228,4 +226,4 @@ app.post("/logout", (req, res) => {
 // message that appears in terminal when you start the server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-});
+});;
