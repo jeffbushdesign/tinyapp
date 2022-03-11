@@ -24,10 +24,24 @@ function generateRandomString() {
   return result;
 };
 
+// Old urlDatabase
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
+// New urlDatabase
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
+
 
 // Helper function for getting ID
 const getCurrentUser = function (userID, usersDatabase) {
@@ -163,17 +177,14 @@ app.get("/", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  console.log(req.body);  // Log the POST request body to the console
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"],
+  };
+  console.log(urlDatabase[shortURL]);
+  // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`);
 });
-
-
-
-
-
-
 
 
 app.get("/urls.json", (req, res) => {
@@ -232,7 +243,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user: currUser,
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render("urls_show", templateVars);
 });
@@ -277,11 +288,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.newURL;
+app.post("/urls/:shortURL/edit", (req, res) => {
+  // when we edit we don't make a new id, we grab the existing id from the params
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"],
+  };
   res.redirect('/urls');
 });
+
 
 // login
 // Add an endpoint to handle a POST to /login in your Express server.
