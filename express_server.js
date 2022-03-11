@@ -155,15 +155,11 @@ app.post("/login", (req, res) => {
 // NEW LOGIN HANDLER
 
 
-
-
-
-
-
-
 app.get("/", (req, res) => {
   res.redirect('/urls');
 });
+
+
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
@@ -177,16 +173,6 @@ app.post("/urls", (req, res) => {
 
 
 
-// add additional endpoints
-// when you're entering a new url
-app.get("/urls/new", (req, res) => {
-  const curUserID = req.cookies["user_id"];
-  const currUser = getCurrentUser(curUserID, users);
-  const templateVars = {
-    user: currUser
-  };
-  res.render("urls_new", templateVars);
-});
 
 
 
@@ -200,6 +186,35 @@ app.get("/hello", (req, res) => {
 
 
 
+// Helper function for checking if email address has already been registered.
+const checkLoggedInFromUserId = function (userId) {
+  for (let item in users) {
+    if (userId === users[item].id) {
+      return true;
+      // console.log(true);
+    }
+  }
+  return false;
+};
+
+// add additional endpoints
+// when you're entering a new url
+app.get("/urls/new", (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
+  const templateVars = {
+    user: currUser
+  };
+
+  // if user is logged in, go to new url page
+  if (checkLoggedInFromUserId(curUserID)) {
+    res.render("urls_new", templateVars);
+  } else {
+    // if user is not logged in redirect to login page
+    res.redirect('/login');
+  }
+});
+
 app.get("/urls", (req, res) => {
   const curUserID = req.cookies["user_id"];
   const currUser = getCurrentUser(curUserID, users);
@@ -209,10 +224,6 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
-
-
-
-
 
 app.get("/urls/:shortURL", (req, res) => {
   const curUserID = req.cookies["user_id"];
@@ -230,6 +241,15 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+
+
+
+
+
+
+
+
+
 
 // Route for register page
 app.get('/register', (req, res) => {
