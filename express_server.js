@@ -195,6 +195,17 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars);
 });
 
+// Route for login page
+app.get('/login', (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
+  const templateVars = {
+    // username: req.cookies["username"],
+    user: currUser
+  };
+  res.render('login', templateVars);
+});
+
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
