@@ -19,12 +19,29 @@
         <a class="nav-item nav-link" href="/register">Register</a>
       </div>
     </div>
-    <div>
+    <div class="navbar-nav">
       <% if (user) { %>
-      <a class="nav-item nav-link" href="/logout">Logout</a>
+
+      <div class="form-group mb-2">
+        <form method="POST" action="/logout">
+          <label>Logged In As: <b><%= user.email %></b></label>
+          <button
+            type="submit"
+            style="
+              background-color: transparent;
+              border-color: darkslategray;
+              color: darkslategray;
+            "
+            class="btn btn-primary"
+          >
+            Logout
+          </button>
+        </form>
+      </div>
+
       <% } else { %>
-      <a class="nav-item nav-link" href="/register">Register</a>
       <a class="nav-item nav-link" href="/login">Login</a>
+      <a class="nav-item nav-link" href="/register">Register</a>
       <% } %>
     </div>
   </nav>

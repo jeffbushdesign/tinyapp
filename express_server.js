@@ -62,7 +62,7 @@ const checkEmailAlreadyRegistered = function (email) {
 };
 
 
-// NEW NEW NEW
+
 app.post("/register", (req, res) => {
   // add a new user object to the global users object. 
   // generate a random user id
@@ -93,7 +93,7 @@ app.post("/register", (req, res) => {
 
 
   // After adding the user, set a user_id cookie containing the user's newly generated ID
-  res.cookie('user_id', id);
+  // res.cookie('user_id', id);
 
   // Test that the users object is properly being appended to. 
   // You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
@@ -103,9 +103,59 @@ app.post("/register", (req, res) => {
 
 
   // go home after registering
+  res.redirect('/login');
+});
+
+// NEW LOGIN HANDLER
+app.post("/login", (req, res) => {
+  // if the email or password are empty strings, send back a response with the 400 status code
+  if (req.body.email === "" || req.body.password === "") {
+    return res.status(400).send("Email and Password field cannot be left blank. Please try again.");
+  }
+
+  // If a user with that e-mail cannot be found, return a response with a 403 status code.
+  if (!checkEmailAlreadyRegistered(req.body.email)) {
+    return res.status(403).send('Error. Email address not found.');
+  }
+
+  // Helper function to get user ID from email provided
+  const getUserIdFromEmail = function (email) {
+    for (let item in users) {
+      if (email === users[item].email) {
+        return users[item].id;
+      }
+    }
+    return false;
+  };
+
+  // Helper function to get user password from email provided
+  const getPasswordFromEmail = function (email) {
+    for (let item in users) {
+      if (email === users[item].email) {
+        return users[item].password;
+      }
+    }
+    return false;
+  };
+
+  // If a user with that e-mail address is located, compare the password given in the form with the existing user's password. If it does not match, return a response with a 403 status code.
+  const userPassword = getPasswordFromEmail(req.body.email);
+  if (req.body.password !== userPassword) {
+    return res.status(403).send('Error. Incorrect Password.');
+  }
+
+  // If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
+  const userId = getUserIdFromEmail(req.body.email);
+  res.cookie('user_id', userId);
+
+
+  // go home after logging in
   res.redirect('/urls');
 });
-/// NEW NEW NEW
+// NEW LOGIN HANDLER
+
+
+
 
 
 
@@ -120,7 +170,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   // res.send("Ok");         // Respond with 'Ok' (we will replace this)
   console.log(req.body);  // Log the POST request body to the console
-  res.redirect(`/ urls / ${shortURL}`);
+  res.redirect(`/urls/${shortURL}`);
 });
 
 
@@ -133,7 +183,6 @@ app.get("/urls/new", (req, res) => {
   const curUserID = req.cookies["user_id"];
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
-    // username: req.cookies["username"],
     user: currUser
   };
   res.render("urls_new", templateVars);
@@ -156,7 +205,6 @@ app.get("/urls", (req, res) => {
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     urls: urlDatabase,
-    // username: req.cookies["username"],
     user: currUser
   };
   res.render("urls_index", templateVars);
@@ -171,7 +219,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const currUser = getCurrentUser(curUserID, users);
 
   const templateVars = {
-    // username: req.cookies["username"],
     user: currUser,
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]
@@ -189,7 +236,6 @@ app.get('/register', (req, res) => {
   const curUserID = req.cookies["user_id"];
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
-    // username: req.cookies["username"],
     user: currUser
   };
   res.render('register', templateVars);
@@ -200,7 +246,6 @@ app.get('/login', (req, res) => {
   const curUserID = req.cookies["user_id"];
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
-    // username: req.cookies["username"],
     user: currUser
   };
   res.render('login', templateVars);
@@ -222,15 +267,15 @@ app.post("/urls/:id", (req, res) => {
 // Add an endpoint to handle a POST to /login in your Express server.
 app.post("/login", (req, res) => {
   // It should set a cookie named username to the value submitted in the request body via the login form
-  const username = req.body.username;
-  res.cookie('username', username);
+  const userId = req.body.user_id;
+  res.cookie('user_id', userId);
 
   // After our server has set the cookie it should redirect the browser back to the /urls page.
   res.redirect('/urls');
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
