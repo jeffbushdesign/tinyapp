@@ -24,10 +24,24 @@ function generateRandomString() {
   return result;
 };
 
+// Old urlDatabase
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
+// New urlDatabase
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW"
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW"
+  }
 };
+
 
 // Helper function for getting ID
 const getCurrentUser = function (userID, usersDatabase) {
@@ -155,39 +169,22 @@ app.post("/login", (req, res) => {
 // NEW LOGIN HANDLER
 
 
-
-
-
-
-
-
 app.get("/", (req, res) => {
   res.redirect('/urls');
 });
 
+
+
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  // res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  console.log(req.body);  // Log the POST request body to the console
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"],
+  };
+  console.log(urlDatabase[shortURL]);
+  // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`);
 });
-
-
-
-
-
-// add additional endpoints
-// when you're entering a new url
-app.get("/urls/new", (req, res) => {
-  const curUserID = req.cookies["user_id"];
-  const currUser = getCurrentUser(curUserID, users);
-  const templateVars = {
-    user: currUser
-  };
-  res.render("urls_new", templateVars);
-});
-
 
 
 app.get("/urls.json", (req, res) => {
@@ -200,19 +197,46 @@ app.get("/hello", (req, res) => {
 
 
 
-app.get("/urls", (req, res) => {
+// Helper function for checking if email address has already been registered.
+const checkLoggedInFromUserId = function (userId) {
+  for (let item in users) {
+    if (userId === users[item].id) {
+      return true;
+      // console.log(true);
+    }
+  }
+  return false;
+};
+
+// add additional endpoints
+// when you're entering a new url
+app.get("/urls/new", (req, res) => {
   const curUserID = req.cookies["user_id"];
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
+    user: currUser
+  };
+
+  // if user is logged in, go to new url page
+  if (checkLoggedInFromUserId(curUserID)) {
+    res.render("urls_new", templateVars);
+  } else {
+    // if user is not logged in redirect to login page
+    res.redirect('/login');
+  }
+});
+
+app.get("/urls", (req, res) => {
+  const curUserID = req.cookies["user_id"];
+  const currUser = getCurrentUser(curUserID, users);
+  // const userURLS = urlDatabase (filtered) rewrite this to filter the results
+  const templateVars = {
+    // this passes the full database
     urls: urlDatabase,
     user: currUser
   };
   res.render("urls_index", templateVars);
 });
-
-
-
-
 
 app.get("/urls/:shortURL", (req, res) => {
   const curUserID = req.cookies["user_id"];
@@ -221,7 +245,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user: currUser,
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]
+    longURL: urlDatabase[req.params.shortURL].longURL
   };
   res.render("urls_show", templateVars);
 });
@@ -230,6 +254,15 @@ app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 });
+
+
+
+
+
+
+
+
+
 
 // Route for register page
 app.get('/register', (req, res) => {
@@ -257,11 +290,16 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect('/urls');
 });
 
-app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  urlDatabase[shortURL] = req.body.newURL;
+app.post("/urls/:shortURL/edit", (req, res) => {
+  // when we edit we don't make a new id, we grab the existing id from the params
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"],
+  };
   res.redirect('/urls');
 });
+
 
 // login
 // Add an endpoint to handle a POST to /login in your Express server.
