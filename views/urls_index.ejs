@@ -30,7 +30,13 @@
           </tr>
         </thead>
         <tbody>
-          <% for(let url in urls) { %>
+          <% if (!user) { %>
+          <div class="alert alert-warning" role="alert">
+            Please <a href="/login" class="alert-link">login</a> or
+            <a href="/register" class="alert-link">register</a> to see your
+            URLs.
+          </div>
+          <% } else { %> <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
             <td><%= urls[url].longURL %></td>
@@ -58,7 +64,7 @@
               </form>
             </td>
           </tr>
-          <% } %>
+          <% } %> <% } %>
         </tbody>
       </table>
     </main>

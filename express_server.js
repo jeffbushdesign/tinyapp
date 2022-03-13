@@ -208,6 +208,20 @@ const checkLoggedInFromUserId = function (userId) {
   return false;
 };
 
+// Helper Function to filter urls database to just show user's urls
+const userURLS = function (user_id) {
+  // object to hold filtered url list
+  const filteredURLS = {};
+  // loop through objects in urlDatabase -- this is the entire url database
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === user_id) {
+      // add urls
+      filteredURLS[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return filteredURLS;
+};
+
 // add additional endpoints
 // when you're entering a new url
 app.get("/urls/new", (req, res) => {
@@ -226,17 +240,35 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+// Home page
 app.get("/urls", (req, res) => {
   const curUserID = req.cookies["user_id"];
   const currUser = getCurrentUser(curUserID, users);
-  // const userURLS = urlDatabase (filtered) rewrite this to filter the results
+
+
   const templateVars = {
-    // this passes the full database
+    // this passes the full database (which you don't want)
     urls: urlDatabase,
+    urls: userURLS(req.cookies["user_id"]),
     user: currUser
   };
   res.render("urls_index", templateVars);
 });
+// Old urlDatabase
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+// const urlDatabase = {
+//   b6UTxQ: {
+//     longURL: "https://www.tsn.ca",
+//     userID: "aJ48lW"
+//   },
+//   i3BoGr: {
+//     longURL: "https://www.google.ca",
+//     userID: "aJ48lW"
+//   }
+// };
 
 app.get("/urls/:shortURL", (req, res) => {
   const curUserID = req.cookies["user_id"];
@@ -245,8 +277,10 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     user: currUser,
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL].longURL
+    longURL: urlDatabase[req.params.shortURL].longURL,
+    urlUserID: urlDatabase[req.params.shortURL].userID
   };
+  // console.log(templateVars);
   res.render("urls_show", templateVars);
 });
 
