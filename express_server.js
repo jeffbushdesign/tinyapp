@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const { func } = require("joi");
+const bcrypt = require('bcryptjs');
 
 const PORT = 8080; // default port 8080
 
@@ -78,6 +79,8 @@ const checkEmailAlreadyRegistered = function (email) {
 
 
 app.post("/register", (req, res) => {
+
+
   // add a new user object to the global users object. 
   // generate a random user id
 
@@ -103,7 +106,7 @@ app.post("/register", (req, res) => {
   // console.log(users.userRandomID);ç
   users[id].id = id;
   users[id].email = req.body.email;
-  users[id].password = req.body.password;
+  users[id].password = bcrypt.hashSync(req.body.password, 10);
 
 
   // After adding the user, set a user_id cookie containing the user's newly generated ID
@@ -152,15 +155,25 @@ app.post("/login", (req, res) => {
     return false;
   };
 
-  // If a user with that e-mail address is located, compare the password given in the form with the existing user's password. If it does not match, return a response with a 403 status code.
-  const userPassword = getPasswordFromEmail(req.body.email);
-  if (req.body.password !== userPassword) {
-    return res.status(403).send('Error. Incorrect Password.');
-  }
-
   // If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
   const userId = getUserIdFromEmail(req.body.email);
   res.cookie('user_id', userId);
+
+  // If a user with that e-mail address is located, compare the password given in the form with the existing user's password. If it does not match, return a response with a 403 status code.
+  const userPassword = getPasswordFromEmail(req.body.email);
+
+
+
+  if (!userId || !bcrypt.compareSync(req.body.password, users[userId].password)) {
+    return res.status(403).send('Error. Incorrect Password.');
+  }
+
+
+  // if (req.body.password !== userPassword) {
+  //   return res.status(403).send('Error. Incorrect Password.');
+  // }
+
+
 
 
   // go home after logging in
