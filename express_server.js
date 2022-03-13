@@ -319,19 +319,31 @@ app.get('/login', (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  const userID = req.cookies["user_id"];
+  const filteredURLS = userURLS(userID);
+  if (Object.keys(filteredURLS).includes(req.params.shortURL)) {
+    const shortURL = req.params.shortURL;
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    return res.status(401).send('Error. You can only delete URLs that are associated with your account.');
+  }
 });
 
 app.post("/urls/:shortURL/edit", (req, res) => {
   // when we edit we don't make a new id, we grab the existing id from the params
-  const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = {
-    longURL: req.body.longURL,
-    userID: req.cookies["user_id"],
-  };
-  res.redirect('/urls');
+  const userID = req.cookies["user_id"];
+  const filteredURLS = userURLS(userID);
+  if (Object.keys(filteredURLS).includes(req.params.id)) {
+    const shortURL = req.params.shortURL;
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: req.cookies["user_id"],
+    };
+    res.redirect('/urls');
+  } else {
+    return res.status(401).send('Error. You can only edit URLs that are associated with your account.');
+  }
 });
 
 
