@@ -6,6 +6,9 @@ const morgan = require('morgan');
 const { func } = require("joi");
 const bcrypt = require('bcryptjs');
 
+// Required functions
+const { getUserByEmail } = require('./helpers');
+
 const PORT = 8080; // default port 8080
 
 const app = express();
@@ -57,15 +60,7 @@ const getCurrentUser = function (userID, usersDatabase) {
   return usersDatabase[userID];
 };
 
-// Helper function - get user ID from email provided
-const getUserIdFromEmail = function (email, usersDatabase) {
-  for (const user in usersDatabase) {
-    if (email === usersDatabase[user].email) {
-      return usersDatabase[user].id;
-    }
-  }
-  return false;
-};
+
 
 
 
@@ -128,6 +123,7 @@ app.post("/register", (req, res) => {
 
   // After adding the user, set a user_id cookie containing the user's newly generated ID
   // res.cookie('user_id', id);
+  // res.session.user_id = userId;
 
   // Test that the users object is properly being appended to. 
   // You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
@@ -152,7 +148,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Error. Email address not found.');
   }
 
-  getUserIdFromEmail(req.body.email, users);
+  // getUserByEmail(req.body.email, users);
 
   // PRE MODULAR VERSION
   // // Helper function to get user ID from email provided
@@ -176,15 +172,15 @@ app.post("/login", (req, res) => {
   };
 
   // If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
-  const userId = getUserIdFromEmail(req.body.email, users);
-  req.session.user_id = userId;
+  const user = getUserByEmail(req.body.email, users);
+  req.session.user_id = user.id;
 
   // If a user with that e-mail address is located, compare the password given in the form with the existing user's password. If it does not match, return a response with a 403 status code.
   const userPassword = getPasswordFromEmail(req.body.email);
 
 
 
-  if (!userId || !bcrypt.compareSync(req.body.password, users[userId].password)) {
+  if (!user || !bcrypt.compareSync(req.body.password, user.password)) {
     return res.status(403).send('Error. Incorrect Password.');
   }
 
@@ -356,6 +352,8 @@ app.get('/login', (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
   const filteredURLS = userURLS(userID);
+  console.log('delete', filteredURLS);
+  console.log('delete1', urlDatabase);
   if (Object.keys(filteredURLS).includes(req.params.shortURL)) {
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL];
@@ -369,7 +367,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
   // when we edit we don't make a new id, we grab the existing id from the params
   const userID = req.session.user_id;
   const filteredURLS = userURLS(userID);
-  if (Object.keys(filteredURLS).includes(req.params.id)) {
+  if (Object.keys(filteredURLS).includes(req.params.shortURL)) {
     const shortURL = req.params.shortURL;
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
@@ -394,7 +392,8 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_id');
+  // res.clearCookie('user_id');
+  req.session.user_id = null;
   res.redirect('/urls');
 });
 
