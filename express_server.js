@@ -57,6 +57,16 @@ const getCurrentUser = function (userID, usersDatabase) {
   return usersDatabase[userID];
 };
 
+// Helper function - get user ID from email provided
+const getUserIdFromEmail = function (email, usersDatabase) {
+  for (const user in usersDatabase) {
+    if (email === usersDatabase[user].email) {
+      return usersDatabase[user].id;
+    }
+  }
+  return false;
+};
+
 
 
 const users = {
@@ -142,15 +152,18 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Error. Email address not found.');
   }
 
-  // Helper function to get user ID from email provided
-  const getUserIdFromEmail = function (email) {
-    for (let item in users) {
-      if (email === users[item].email) {
-        return users[item].id;
-      }
-    }
-    return false;
-  };
+  getUserIdFromEmail(req.body.email, users);
+
+  // PRE MODULAR VERSION
+  // // Helper function to get user ID from email provided
+  // const getUserIdFromEmail = function (email) {
+  //   for (let item in users) {
+  //     if (email === users[item].email) {
+  //       return users[item].id;
+  //     }
+  //   }
+  //   return false;
+  // };
 
   // Helper function to get user password from email provided
   const getPasswordFromEmail = function (email) {
@@ -163,7 +176,7 @@ app.post("/login", (req, res) => {
   };
 
   // If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
-  const userId = getUserIdFromEmail(req.body.email);
+  const userId = getUserIdFromEmail(req.body.email, users);
   req.session.user_id = userId;
 
   // If a user with that e-mail address is located, compare the password given in the form with the existing user's password. If it does not match, return a response with a 403 status code.
