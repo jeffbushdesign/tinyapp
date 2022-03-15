@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const morgan = require('morgan');
 const { func } = require("joi");
 const bcrypt = require('bcryptjs');
@@ -10,6 +11,12 @@ const PORT = 8080; // default port 8080
 const app = express();
 
 app.set("view engine", "ejs");
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ['JEFF'],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -157,7 +164,7 @@ app.post("/login", (req, res) => {
 
   // If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
   const userId = getUserIdFromEmail(req.body.email);
-  res.cookie('user_id', userId);
+  req.session.user_id = userId;
 
   // If a user with that e-mail address is located, compare the password given in the form with the existing user's password. If it does not match, return a response with a 403 status code.
   const userPassword = getPasswordFromEmail(req.body.email);
@@ -192,7 +199,9 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies["user_id"],
+    // userID: req.cookies["user_id"],
+    userID: req.session.user_id
+
   };
   console.log(urlDatabase[shortURL]);
   // console.log(req.body);  // Log the POST request body to the console
@@ -238,7 +247,7 @@ const userURLS = function (user_id) {
 // add additional endpoints
 // when you're entering a new url
 app.get("/urls/new", (req, res) => {
-  const curUserID = req.cookies["user_id"];
+  const curUserID = req.session.user_id;
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     user: currUser
@@ -255,14 +264,14 @@ app.get("/urls/new", (req, res) => {
 
 // Home page
 app.get("/urls", (req, res) => {
-  const curUserID = req.cookies["user_id"];
+  const curUserID = req.session.user_id;
   const currUser = getCurrentUser(curUserID, users);
 
 
   const templateVars = {
     // this passes the full database (which you don't want)
     urls: urlDatabase,
-    urls: userURLS(req.cookies["user_id"]),
+    urls: userURLS(req.session.user_id),
     user: currUser
   };
   res.render("urls_index", templateVars);
@@ -284,7 +293,7 @@ app.get("/urls", (req, res) => {
 // };
 
 app.get("/urls/:shortURL", (req, res) => {
-  const curUserID = req.cookies["user_id"];
+  const curUserID = req.session.user_id;
   const currUser = getCurrentUser(curUserID, users);
 
   const templateVars = {
@@ -313,7 +322,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Route for register page
 app.get('/register', (req, res) => {
-  const curUserID = req.cookies["user_id"];
+  const curUserID = req.session.user_id;
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     user: currUser
@@ -323,7 +332,7 @@ app.get('/register', (req, res) => {
 
 // Route for login page
 app.get('/login', (req, res) => {
-  const curUserID = req.cookies["user_id"];
+  const curUserID = req.session.user_id;
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     user: currUser
@@ -332,7 +341,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const filteredURLS = userURLS(userID);
   if (Object.keys(filteredURLS).includes(req.params.shortURL)) {
     const shortURL = req.params.shortURL;
@@ -345,13 +354,13 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:shortURL/edit", (req, res) => {
   // when we edit we don't make a new id, we grab the existing id from the params
-  const userID = req.cookies["user_id"];
+  const userID = req.session.user_id;
   const filteredURLS = userURLS(userID);
   if (Object.keys(filteredURLS).includes(req.params.id)) {
     const shortURL = req.params.shortURL;
     urlDatabase[shortURL] = {
       longURL: req.body.longURL,
-      userID: req.cookies["user_id"],
+      userID: req.session.user_id,
     };
     res.redirect('/urls');
   } else {
@@ -365,7 +374,7 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 app.post("/login", (req, res) => {
   // It should set a cookie named username to the value submitted in the request body via the login form
   const userId = req.body.user_id;
-  res.cookie('user_id', userId);
+  res.session.user_id = userId;
 
   // After our server has set the cookie it should redirect the browser back to the /urls page.
   res.redirect('/urls');
