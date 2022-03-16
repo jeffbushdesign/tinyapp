@@ -54,7 +54,6 @@ const checkLoggedInFromUserId = function (userId) {
   for (let item in users) {
     if (userId === users[item].id) {
       return true;
-      // console.log(true);
     }
   }
   return false;

@@ -1,6 +1,5 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const morgan = require('morgan');
 const bcrypt = require('bcryptjs');
@@ -39,7 +38,6 @@ app.use(cookieSession({
 }));
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(morgan('dev'));
 
 // --------------------------------- 
@@ -89,6 +87,9 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const curUserID = req.session.user_id;
+  if (!curUserID) {
+    res.redirect('/login');
+  }
   const currUser = getCurrentUser(curUserID, users);
   const templateVars = {
     user: currUser,
@@ -100,7 +101,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
 });
 
@@ -146,13 +147,10 @@ app.post("/register", (req, res) => {
   users[id].email = req.body.email;
   users[id].password = bcrypt.hashSync(req.body.password, 10);
   // After adding the user, set a user_id cookie containing the user's newly generated ID
-
-  // Test that the users object is properly being appended to. 
-  // You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
-  console.log('User database:', users);
+  req.session.user_id = id;
 
   // go home after registering
-  res.redirect('/login');
+  res.redirect('/urls');
 });
 
 app.post("/logout", (req, res) => {
@@ -196,8 +194,6 @@ app.post("/urls", (req, res) => {
     userID: req.session.user_id
 
   };
-  console.log(urlDatabase[shortURL]);
-  // console.log(req.body);  // Log the POST request body to the console
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -207,8 +203,6 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userID = req.session.user_id;
   const filteredURLS = userURLS(userID);
-  console.log('delete', filteredURLS);
-  console.log('delete1', urlDatabase);
   if (Object.keys(filteredURLS).includes(req.params.shortURL)) {
     const shortURL = req.params.shortURL;
     delete urlDatabase[shortURL];
