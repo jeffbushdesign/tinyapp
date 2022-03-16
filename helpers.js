@@ -7,8 +7,21 @@ const getUserByEmail = function (email, usersDatabase) {
       return usersDatabase[user];
     }
   }
-  return null;
+  return undefined;
 };
 
-module.exports = { getUserByEmail };
+const generateRandomString = function () {
+  let result = '';
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const length = 6;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
+
+module.exports = {
+  getUserByEmail,
+  generateRandomString
+};
 

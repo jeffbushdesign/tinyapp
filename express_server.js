@@ -24,16 +24,16 @@ app.use(cookieSession({
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan('dev'));
+// app.use('url', urlRoute);
 
-function generateRandomString() {
-  let result = '';
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  const length = 6;
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
+// --------------------------------- 
+// GET ROUTES
+// --------------------------------- 
+// POST ROUTES
+// UPDATES
+
+
+
 
 // Old urlDatabase
 // const urlDatabase = {
