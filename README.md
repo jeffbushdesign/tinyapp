@@ -1,98 +1,22 @@
-# tinyapp
+# TinyApp Project
 
-Cookie Parser Read-me
-https://github.com/expressjs/cookie-parser
+TinyApp is a full stack web application built with Node and Express that allows users to shorten long URLs (à la bit.ly).
 
-Test Locally
-http://localhost:8080/urls
+## Final Product
 
-Form in \_header.ejs
+!["screenshot description"](#)
+!["screenshot description"](#)
 
-<form method="POST" action="/login" class="form-inline">
-  <input
-    class="form-control"
-    type="text"
-    name="username"
-    placeholder="Username"
-    style="width: 200px; margin: 1em"
-  />
-  <button
-    type="submit"
-    style="
-      background-color: transparent;
-      border-color: darkslategray;
-      color: darkslategray;
-    "
-    class="btn btn-primary"
-  >
-    Login
-  </button>
-</form>
+## Dependencies
 
-Old login form
-<% if (user) { %>
-<form method="POST" action="/logout">
-<div class="form-group mb-2">
-<label>Logged In As: <b><%= user.email %></b></label>
-<button
-          type="submit"
-          style="
-            background-color: transparent;
-            border-color: darkslategray;
-            color: darkslategray;
-          "
-          class="btn btn-primary"
-        >
-Logout
-</button>
-</div>
-</form>
-<% } else{ %>
-<form method="POST" action="/login" class="form-inline">
-<input
-        class="form-control"
-        type="text"
-        name="username"
-        placeholder="Username"
-        style="width: 200px; margin: 1em"
-      />
-<button
-        type="submit"
-        style="
-          background-color: transparent;
-          border-color: darkslategray;
-          color: darkslategray;
-        "
-        class="btn btn-primary"
-      >
-Login
-</button>
-</form>
-<% } %>
+- Node.js
+- Express
+- EJS
+- bcrypt
+- body-parser
+- cookie-session
 
-      <div class="form-group mb-2">
-        <button
-          type="submit"
-          style="
-            background-color: transparent;
-            border-color: darkslategray;
-            color: darkslategray;
-          "
-          class="btn btn-primary"
-        >
-          Test
-        </button>
-        <button
-          type="submit"
-          style="
-            background-color: transparent;
-            border-color: darkslategray;
-            color: darkslategray;
-          "
-          class="btn btn-primary"
-        >
-          Login
-        </button>
-      </div>
+## Getting Started
 
-    </form>
+- Install all dependencies (using the `npm install` command).
+- Run the development web server using the `node express_server.js` command.
