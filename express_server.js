@@ -7,7 +7,14 @@ const { func } = require("joi");
 const bcrypt = require('bcryptjs');
 
 // Required functions
-const { getUserByEmail } = require('./helpers');
+// const { getUserByEmail } = require('./helpers');
+// const { generateRandomString } = require('./helpers');
+const { getUserByEmail,
+  generateRandomString,
+} = require('./helpers');
+// const { generateRandomString } = require('./helpers');
+
+
 
 const PORT = 8080; // default port 8080
 
